@@ -74,7 +74,7 @@ const FileUpload = ({ onUploadSuccess }) => {
           startIcon={<CloudUploadIcon />}
           sx={{
             mb: 2,
-            bgcolor: 'primary.main',
+            bgcolor: '#677E88',
             '&:hover': {
               bgcolor: 'primary.dark',
               transform: 'translateY(-2px)',

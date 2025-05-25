@@ -24,7 +24,7 @@ const MachineTable = ({ data }) => (
             {row.machines.map((m, i) => (
               <React.Fragment key={i}>
                 <TableCell>{m.reference}</TableCell>
-                <TableCell>{m.output}</TableCell>
+                <TableCell style={{ color: m.output < 100 ? 'red' : 'white' }}>{m.output}</TableCell>
               </React.Fragment>
             ))}
           </TableRow>

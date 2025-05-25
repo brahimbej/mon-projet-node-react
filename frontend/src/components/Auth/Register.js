@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Alert } from '@mui/material';
 import { authService } from '../../services/auth';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Register = ({ onRegisterSuccess }) => {
   const [formData, setFormData] = useState({
@@ -240,6 +241,12 @@ const Register = ({ onRegisterSuccess }) => {
         >
           Create Account
         </Button>
+        <Typography sx={{ mt: 2, color: '#888', textAlign: 'center' }}>
+          Already have an account?{' '}
+          <RouterLink to="/login" style={{ color: '#8b5cf6', textDecoration: 'underline' }}>
+            Login
+          </RouterLink>
+        </Typography>
       </Box>
     </Box>
   );

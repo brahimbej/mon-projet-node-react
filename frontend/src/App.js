@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
-import { authService } from './services/auth';
+import { Box } from '@mui/material';
+import Sidebar from './components/Sidebar';
 
 const theme = createTheme({
   palette: {
@@ -17,10 +18,49 @@ const theme = createTheme({
   }
 });
 
+const Layout = ({ children, dashboardData, setDashboardData, handleLogout }) => {
+  const location = useLocation();
+  const hideSidebar = location.pathname === '/login' || location.pathname === '/register';
+
+  return (
+    <Box 
+      sx={{ 
+        display: 'flex', 
+        height: '100vh',
+        width: '100vw',
+        overflow: 'hidden' 
+      }}
+    >
+      {!hideSidebar && (
+        <Box 
+          sx={{ 
+            width: 240,
+            flexShrink: 0 
+          }}
+        >
+          <Sidebar 
+            onLogout={handleLogout}
+            dashboardData={dashboardData}
+            setDashboardData={setDashboardData} 
+          />
+        </Box>
+      )}
+
+      <Box 
+        sx={{ 
+          flexGrow: 1, 
+          overflow: 'auto', 
+          p: 2 
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+};
+
 function App() {
   const [dashboardData, setDashboardData] = useState(null);
-
-
 
   const isAuthenticated = () => {
     const token = localStorage.getItem('token');
@@ -49,12 +89,18 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <AppRoutes 
-          isAuthenticated={isAuthenticated}
-          handleLoginSuccess={handleLoginSuccess}
-          dashboardData={dashboardData}
-          setDashboardData={setDashboardData}
-        />
+        <Layout 
+          dashboardData={dashboardData} 
+          setDashboardData={setDashboardData} 
+          handleLogout={handleLogout}
+        >
+          <AppRoutes 
+            isAuthenticated={isAuthenticated}
+            handleLoginSuccess={handleLoginSuccess}
+            dashboardData={dashboardData}
+            setDashboardData={setDashboardData}
+          />
+        </Layout>
       </Router>
     </ThemeProvider>
   );

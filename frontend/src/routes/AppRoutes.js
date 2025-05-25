@@ -5,8 +5,20 @@ import Login from '../components/Auth/Login';
 import Register from '../components/Auth/Register';
 import FileUpload from '../components/FileUpload';
 import Dashboard from '../components/Dashboard';
+import { useState } from 'react';
+import Sidebar from '../components/Sidebar';
+import { Box } from '@mui/material';
 
 const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDashboardData }) => {
+  const handleLogout = () => {
+    // Add your logout logic here (e.g., clear tokens, reset state, redirect, etc.)
+    window.location.href = '/login';
+  };
+
+  const handleRegisterSuccess =() => {
+    window.location.href = '/login';
+  }
+
   return (
     <Routes>
       <Route 
@@ -19,21 +31,42 @@ const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDash
       />
       <Route 
         path="/register" 
-        element={<Register onRegisterSuccess={handleLoginSuccess} />} 
+        element={<Register onRegisterSuccess={handleRegisterSuccess} />} 
       />
+      
       <Route 
         path="/dashboard" 
         element={
           isAuthenticated ? (
-            <Container sx={{ mt: 4 }} >
-              <FileUpload onUploadSuccess={setDashboardData} />
-              {dashboardData && <Dashboard data={dashboardData} />}
-            </Container>
+
+              <Box sx={{  }}>
+                {!dashboardData && (
+                  <FileUpload onUploadSuccess={setDashboardData} />
+                )}
+                {dashboardData && (
+                  <Dashboard data={dashboardData} />
+                )}
+              </Box>
           ) : (
             <Navigate to="/login" />
           )
         } 
       />
+      <Route
+        path="/new-file"
+        element={
+          isAuthenticated ? (
+            // <div>New Page</div>
+            <Box sx={{ flex:1, justifyContent :"center", alignItems :"center" }}>
+
+              <FileUpload onUploadSuccess={setDashboardData} />
+            </Box>
+
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+        />
     </Routes>
   );
 };
