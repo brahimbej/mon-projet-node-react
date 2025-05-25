@@ -14,7 +14,7 @@ const FileUpload = ({ onUploadSuccess }) => {
     }
   };
 
-  const handleUpload = async () => {
+   const handleUpload = async () => {
     if (!file) return;
 
     try {

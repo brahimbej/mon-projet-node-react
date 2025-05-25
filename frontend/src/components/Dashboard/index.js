@@ -5,6 +5,8 @@ import TeamBarChart from './TeamBarChart';
 import MachineLineChart from './MachineLineChart';
 import TotalMachineChart from './TotalMachineChart';
 import DonutChart from './DonutChart';
+import ProductionChart from '../ProductionChart';
+import TotalRealizationChart from '../TotalRealizationChart';
 import Sidebar from '../Sidebar';
 
 const Dashboard = ({ data, onLogout }) => {
@@ -53,38 +55,46 @@ const Dashboard = ({ data, onLogout }) => {
   console.log("lineChartData" , lineChartData)
   return (
     <Box sx={{ p: 4, width: '100%', overflowX: 'hidden' }}>
-
         <Typography variant="h4" gutterBottom>Réalisation Dashboard</Typography>
 
         <Box mb={4}>
           <MachineTable data={data} />
         </Box>
 
-        <Grid container spacing={4}>
+
+
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Grid container spacing={4}>
           {/* Row 1: Team Bar Chart and Machine Line Chart */}
           <Grid item xs={12} md={6}>
             <Box p={1} minHeight={300} minWidth={500} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
               <TeamBarChart teamChartData={teamChartData} />
             </Box>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Box p={1} minHeight={300} minWidth={500} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
-              <MachineLineChart chartData={lineChartData} />
-            </Box>
-          </Grid>
 
-          {/* Row 2: Total Machine Chart and Donut Chart */}
-          <Grid item xs={12} md={6}>
-            <Box p={1} minHeight={300} minWidth={500} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
-              <TotalMachineChart data={totalMachineData} />
-            </Box>
-          </Grid>
+
           <Grid item xs={12} md={6}>
             <Box p={1} minHeight={300} minWidth={500} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
               <DonutChart percentage={pourcentage} />
             </Box>
           </Grid>
         </Grid>
+      </Box>
+
+
+        <Box mt={4} mb={4}>
+        <Box p={1} minHeight={300} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
+
+          <TotalRealizationChart data={data} />
+          </Box>
+        </Box>
+
+                {/* Production Chart */}
+                <Box mt={4}>
+          <Box p={1} minHeight={300} bgcolor="#f5f5f5" borderRadius={3} boxShadow={2}>
+            <ProductionChart data={data} />
+          </Box>
+        </Box>
       </Box>
   );
 };

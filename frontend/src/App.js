@@ -60,7 +60,17 @@ const Layout = ({ children, dashboardData, setDashboardData, handleLogout }) => 
 };
 
 function App() {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState(() => {
+    // Initialize state from localStorage if available
+    const cachedData = localStorage.getItem('dashboardData');
+    return cachedData ? JSON.parse(cachedData) : null;
+  });
+
+  const handleSetDashboardData = (data) => {
+    setDashboardData(data);
+    // Cache the data in localStorage
+    localStorage.setItem('dashboardData', JSON.stringify(data));
+  };
 
   const isAuthenticated = () => {
     const token = localStorage.getItem('token');
@@ -69,6 +79,11 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    // Load cached data on component mount
+    const cachedData = localStorage.getItem('dashboardData');
+    if (cachedData) {
+      setDashboardData(JSON.parse(cachedData));
+    }
   }, []);
 
   const handleLoginSuccess = (data) => {
@@ -81,6 +96,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
+    localStorage.removeItem('dashboardData'); // Clear cached data on logout
     setDashboardData(null);
     window.location.href = '/';
   };
@@ -91,14 +107,14 @@ function App() {
       <Router>
         <Layout 
           dashboardData={dashboardData} 
-          setDashboardData={setDashboardData} 
+          setDashboardData={handleSetDashboardData} 
           handleLogout={handleLogout}
         >
           <AppRoutes 
             isAuthenticated={isAuthenticated}
             handleLoginSuccess={handleLoginSuccess}
             dashboardData={dashboardData}
-            setDashboardData={setDashboardData}
+            setDashboardData={handleSetDashboardData}
           />
         </Layout>
       </Router>
