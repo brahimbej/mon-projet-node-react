@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Alert } from '@mui/material';
 import { authService } from '../../services/auth';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -9,22 +10,19 @@ const Login = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
+    
     try {
-      // Ajout de validation basique
+      // Validation basique
       if (!email || !password) {
         setError('Veuillez remplir tous les champs');
         return;
       }
       
-      // Validation du mot de passe
-      if (password.length < 8) {
-        setError('Le mot de passe doit contenir au moins 8 caractères');
-        return;
-      }
-
       const data = await authService.login(email, password);
       onLoginSuccess(data);
     } catch (err) {
+      // Use the error message directly from the auth service
       setError(err.message);
     }
   };
@@ -57,7 +55,6 @@ const Login = ({ onLoginSuccess }) => {
             maxWidth: '80%',
             height: 'auto',
             borderRadius: '12px',
-
           }}
         />
       </Box>
@@ -96,19 +93,24 @@ const Login = ({ onLoginSuccess }) => {
         </Typography>
 
         {error && (
-          <Alert 
-            severity="error" 
-            sx={{ 
-              mb: 2,
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              p: 2,
+              mb: 3,
+              borderRadius: 1,
               bgcolor: 'rgba(211, 47, 47, 0.1)',
-              color: '#ff1744'
+              border: '1px solid rgba(211, 47, 47, 0.3)',
             }}
           >
-            {error}
-          </Alert>
+            <ErrorOutlineIcon sx={{ color: '#ff1744' }} />
+            <Typography sx={{ color: '#ff1744', fontSize: '0.9rem' }}>
+              {error}
+            </Typography>
+          </Box>
         )}
-
-
 
         <TextField
           fullWidth

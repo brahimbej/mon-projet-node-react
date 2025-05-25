@@ -5,7 +5,7 @@ export const authService = {
     try {
       // Validation basique
       if (!email || !password) {
-        throw new Error('Identifiants invalides');
+        throw new Error('Veuillez remplir tous les champs');
       }
 
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -16,12 +16,19 @@ export const authService = {
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erreur de connexion');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Email ou mot de passe incorrect');
+        } else if (response.status === 404) {
+          throw new Error('Utilisateur non trouvé');
+        } else if (data.message) {
+          throw new Error(data.message);
+        } else {
+          throw new Error('Erreur lors de la connexion');
+        }
+      }
       
       // Simple authentication flag
       localStorage.setItem('isAuthenticated', 'true');
@@ -29,7 +36,10 @@ export const authService = {
       
       return data;
     } catch (error) {
-      throw new Error('Erreur de connexion au serveur');
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Impossible de se connecter au serveur. Veuillez vérifier votre connexion.');
+      }
+      throw error;
     }
   },
 
@@ -48,13 +58,17 @@ export const authService = {
         body: JSON.stringify({ email, password })
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Erreur d\'inscription:', error);
-        throw new Error(error.message || 'Erreur lors de l\'inscription');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          throw new Error('Cet email est déjà utilisé');
+        } else if (data.message) {
+          throw new Error(data.message);
+        } else {
+          throw new Error('Erreur lors de l\'inscription');
+        }
+      }
       
       // Automatically log in after successful registration
       localStorage.setItem('isAuthenticated', 'true');
@@ -62,8 +76,10 @@ export const authService = {
       
       return data;
     } catch (error) {
-      console.error('Erreur détaillée:', error);
-      throw new Error(error.message || 'Erreur lors de l\'inscription');
+      if (error.message === 'Failed to fetch') {
+        throw new Error('Impossible de se connecter au serveur. Veuillez vérifier votre connexion.');
+      }
+      throw error;
     }
   },
 
