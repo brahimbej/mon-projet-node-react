@@ -8,13 +8,23 @@ const FileUpload = ({ onUploadSuccess }) => {
   const [error, setError] = useState(null);
 
   const handleFileChange = (event) => {
-    if (event.target.files?.[0]) {
-      setFile(event.target.files[0]);
+    const selectedFile = event.target.files?.[0];
+    if (selectedFile) {
+      // Vérifier le type de fichier
+      const validTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+      ];
+      if (!validTypes.includes(selectedFile.type)) {
+        setError('Seuls les fichiers Excel (.xlsx, .xls) sont acceptés');
+        return;
+      }
+      setFile(selectedFile);
       setError(null);
     }
   };
 
-   const handleUpload = async () => {
+  const handleUpload = async () => {
     if (!file) return;
 
     try {
@@ -26,10 +36,6 @@ const FileUpload = ({ onUploadSuccess }) => {
       const response = await fetch('http://localhost:5000/api/upload', {
         method: 'POST',
         body: formData,
-        headers: {
-          'Accept': 'application/json'
-        },
-        mode: 'cors',
         credentials: 'include'
       });
 
@@ -38,8 +44,17 @@ const FileUpload = ({ onUploadSuccess }) => {
         throw new Error(errorData || `Erreur HTTP: ${response.status}`);
       }
 
-      const data = await response.json();
-      onUploadSuccess(data);
+      const responseData = await response.json();
+      
+      // Vérification et transformation des données si nécessaire
+      if (responseData && Array.isArray(responseData.data)) {
+        onUploadSuccess(responseData.data);
+      } else if (responseData && Array.isArray(responseData)) {
+        onUploadSuccess(responseData);
+      } else {
+        throw new Error('Format de données invalide');
+      }
+      
       setFile(null);
     } catch (err) {
       console.error('Erreur détaillée:', err);

@@ -3,6 +3,7 @@ import { Box, List, ListItem, ListItemText, Divider, Button, IconButton, Circula
 import { useNavigate } from 'react-router-dom';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HistoryIcon from '@mui/icons-material/History';
 
 const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
     const navigate = useNavigate();
@@ -70,22 +71,6 @@ const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
         >
             <div>
                 <List>
-                    {/* <ListItem 
-                        button 
-                        selected={!!dashboardData} 
-                        onClick={() => navigate('/dashboard')}
-                        sx={{
-                            '&.Mui-selected': {
-                                backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(139, 92, 246, 0.3)',
-                                },
-                            },
-                        }}
-                    >
-                        <ListItemText primary="Dashboard" />
-                    </ListItem> */}
-                    
                     <ListItem>
                         <input
                             type="file"
@@ -144,6 +129,23 @@ const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
                             </Button>
                         </ListItem>
                     )}
+
+                    <ListItem>
+                        <Button
+                            fullWidth
+                            startIcon={<HistoryIcon />}
+                            onClick={() => navigate('/history')}
+                            sx={{
+                                color: 'white',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                },
+                            }}
+                        >
+                            Historique
+                        </Button>
+                    </ListItem>
+
                 </List>
                 <Divider sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
             </div>

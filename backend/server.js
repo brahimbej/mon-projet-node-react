@@ -4,12 +4,19 @@ const multer = require('multer');
 const path = require('path');
 const xlsx = require('xlsx');
 const mongoose = require('mongoose');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 
+// Créer le dossier uploads s'il n'existe pas
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
+
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/slilm', {
+mongoose.connect('mongodb://localhost:27017/production-dashboard', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -21,13 +28,12 @@ app.use(express.json());
 
 // Configuration CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://extensions.aitopia.ai'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'http://localhost:3000',
+  credentials: true
 }));
 
-
+// Servir les fichiers statiques du dossier uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes d'authentification
 const authRoutes = require('./routes/auth');

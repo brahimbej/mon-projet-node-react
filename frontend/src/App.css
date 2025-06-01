@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  margin-left: 250px; /* Correspond à la largeur de la sidebar ouverte */
+  transition: margin-left 0.3s;
+}
+
+/* Ajustement quand la sidebar est fermée */
+.sidebar.closed + .main-content {
+  margin-left: 60px;
+}

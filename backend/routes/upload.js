@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const path = require('path');
+const FileUpload = require('../models/FileUpload');
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -10,16 +12,30 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+    // Générer un nom de fichier unique
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: function(req, file, cb) {
+    // Vérifier le type de fichier
+    if (file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || 
+        file.mimetype === "application/vnd.ms-excel") {
+      cb(null, true);
+    } else {
+      cb(new Error("Seuls les fichiers Excel sont autorisés!"), false);
+    }
+  }
+});
 
 // Upload route
-router.post('/', upload.single('file'), (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      throw new Error('No file uploaded');
+      throw new Error('Aucun fichier uploadé');
     }
 
     const workbook = xlsx.readFile(req.file.path);
@@ -35,7 +51,6 @@ router.post('/', upload.single('file'), (req, res) => {
       const effectif = row[1];
       const machines = [];
 
-      // Loop through the machine columns starting from index 2
       for (let j = 2; j < row.length; j += 2) {
         const reference = row[j];
         const output = row[j + 1];
@@ -47,30 +62,68 @@ router.post('/', upload.single('file'), (req, res) => {
       result.push({ hour, effectif, machines });
     }
 
-    // Optionally remove the uploaded file
-    fs.unlinkSync(req.file.path);
-    console.log({result});
-    for (let i = 0; i < result.length; i++) {
-      const row = result[i];
-      const hour = row.hour;
-      const effectif = row.effectif;
-      const machines = row.machines;
+    // Sauvegarder les informations du fichier dans la base de données
+    const fileUpload = new FileUpload({
+      originalName: req.file.originalname,
+      fileName: req.file.filename,
+      filePath: req.file.path,
+      fileSize: req.file.size,
+      processedData: result,
+      status: 'success'
+    });
 
-      console.log(`Hour: ${hour}, Effectif: ${effectif}`);
-      console.log('Machines:');
-      for (let j = 0; j < machines.length; j++) {
-        const machine = machines[j];
-        const reference = machine.reference;
-        const output = machine.output;
-        console.log(`  Reference: ${reference}, Output: ${output}`);
+    await fileUpload.save();
+    
+    res.json({
+      data: result,
+      fileInfo: {
+        id: fileUpload._id,
+        originalName: fileUpload.originalName,
+        uploadDate: fileUpload.uploadDate,
+        fileName: fileUpload.fileName
+      }
+    });
+  } catch (error) {
+    // En cas d'erreur, sauvegarder quand même l'information avec le statut d'erreur
+    if (req.file) {
+      try {
+        const fileUpload = new FileUpload({
+          originalName: req.file.originalname,
+          fileName: req.file.filename,
+          filePath: req.file.path,
+          fileSize: req.file.size,
+          processedData: {},
+          status: 'error'
+        });
+        await fileUpload.save();
+      } catch (dbError) {
+        console.error('Error saving file information:', dbError);
       }
     }
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    
-    res.json(result);
+// Route pour récupérer l'historique des fichiers
+router.get('/history', async (req, res) => {
+  try {
+    const files = await FileUpload.find()
+      .select('-processedData') // Exclure les données traitées pour alléger la réponse
+      .sort({ uploadDate: -1 }); // Trier par date d'upload décroissante
+    res.json(files);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Route pour télécharger un fichier
+router.get('/download/:filename', (req, res) => {
+  const filePath = path.join(__dirname, '../uploads', req.params.filename);
+  res.download(filePath, (err) => {
+    if (err) {
+      res.status(404).json({ error: 'Fichier non trouvé' });
+    }
+  });
 });
 
 module.exports = router;

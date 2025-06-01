@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import { Box } from '@mui/material';
 import Sidebar from './components/Sidebar';
+import HistoryPage from './pages/HistoryPage';
 
 const theme = createTheme({
   palette: {
@@ -110,12 +111,26 @@ function App() {
           setDashboardData={handleSetDashboardData} 
           handleLogout={handleLogout}
         >
-          <AppRoutes 
-            isAuthenticated={isAuthenticated}
-            handleLoginSuccess={handleLoginSuccess}
-            dashboardData={dashboardData}
-            setDashboardData={handleSetDashboardData}
-          />
+          <Routes>
+            <Route 
+              path="/history" 
+              element={
+                isAuthenticated() ? (
+                  <HistoryPage />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              } 
+            />
+            <Route path="/*" element={
+              <AppRoutes 
+                isAuthenticated={isAuthenticated}
+                handleLoginSuccess={handleLoginSuccess}
+                dashboardData={dashboardData}
+                setDashboardData={handleSetDashboardData}
+              />
+            } />
+          </Routes>
         </Layout>
       </Router>
     </ThemeProvider>
