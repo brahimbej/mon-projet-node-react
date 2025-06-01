@@ -5,6 +5,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 const FileUpload = require('../models/FileUpload');
+const DashboardData = require('../models/DashboardData');
 
 // Multer configuration
 const storage = multer.diskStorage({
@@ -72,6 +73,22 @@ router.post('/', upload.single('file'), async (req, res) => {
       status: 'success'
     });
 
+    console.log({result});
+
+    // Filter out any invalid entries (like the header row with undefined hour)
+    const validEntries = result.filter(entry => entry.hour && entry.hour !== 'Effectif');
+
+    const dashboardData = new DashboardData({
+      filename: req.file.filename,      // The stored filename on the server
+      originalName: req.file.originalname, // The original filename from the user
+      entries: validEntries,
+      uploadedAt: new Date(),
+      status: 'success'
+    });
+
+    await dashboardData.save();
+    console.log('Dashboard data saved successfully with filename:', req.file.filename);
+
     await fileUpload.save();
     
     res.json({
@@ -107,12 +124,34 @@ router.post('/', upload.single('file'), async (req, res) => {
 // Route pour récupérer l'historique des fichiers
 router.get('/history', async (req, res) => {
   try {
-    const files = await FileUpload.find()
-      .select('-processedData') // Exclure les données traitées pour alléger la réponse
-      .sort({ uploadDate: -1 }); // Trier par date d'upload décroissante
-    res.json(files);
+    // const files = await FileUpload.find()
+    //   .select('-processedData') // Exclure les données traitées pour alléger la réponse
+    //   .sort({ uploadDate: -1 }); // Trier par date d'upload décroissante
+
+      //get the dashboard data
+      const dashboardData = await DashboardData.find()
+      // .sort({ uploadedAt: -1 });
+
+      console.log({dashboardData});
+    res.json(dashboardData);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Get a specific history item by ID
+router.get('/history/:id', async (req, res) => {
+  try {
+    const item = await DashboardData.findById(req.params.id);
+    
+    if (!item) {
+      return res.status(404).json({ message: 'History item not found' });
+    }
+    
+    res.json(item);
+  } catch (error) {
+    console.error('Error fetching history item:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

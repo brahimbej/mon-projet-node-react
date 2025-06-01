@@ -8,6 +8,8 @@ import Dashboard from '../components/Dashboard';
 import { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box } from '@mui/material';
+import HistoryPage from '../pages/HistoryPage';
+import HistoryDetailPage from '../pages/HistoryDetailPage';
 
 const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDashboardData }) => {
   const handleLogout = () => {
@@ -67,6 +69,27 @@ const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDash
           )
         }
         />
+      <Route 
+        path="/history" 
+        element={
+          isAuthenticated ? (
+            <HistoryPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
+
+      <Route 
+        path="/history/:id" 
+        element={
+          isAuthenticated ? (
+            <HistoryDetailPage />
+          ) : (
+            <Navigate to="/login" />
+          )
+        } 
+      />
     </Routes>
   );
 };

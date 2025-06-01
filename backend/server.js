@@ -45,7 +45,7 @@ app.use('/api/auth', authRoutes);
 const uploadRoutes = require('./routes/upload');
 app.use('/api/upload', uploadRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
 });

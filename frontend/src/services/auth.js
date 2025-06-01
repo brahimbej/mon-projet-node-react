@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:4000/api';
 
 export const authService = {
   login: async (email, password) => {
@@ -49,6 +49,7 @@ export const authService = {
       if (!email || !password) {
         throw new Error('Tous les champs sont requis');
       }
+      console.log({email, password});
 
       const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
@@ -59,6 +60,7 @@ export const authService = {
       });
 
       const data = await response.json();
+      console.log({data});
 
       if (!response.ok) {
         if (response.status === 409) {
