@@ -9,12 +9,17 @@ import ProductionChart from '../ProductionChart';
 import TotalRealizationChart from '../TotalRealizationChart';
 import Sidebar from '../Sidebar';
 
-const Dashboard = ({ data, onLogout }) => {
+const Dashboard = ({ data = [], onLogout }) => {
   const allMachineRefs = Array.from(
-    // Array.isArray(data) ? data.flatMap(item => /* your logic */) : [];
-
-    Array.isArray(data) ? new Set(data.flatMap(row => row.machines.map(m => m.reference))) : []
+    new Set(
+      data.flatMap(row =>
+        Array.isArray(row.machines)
+          ? row.machines.map(m => m.reference)
+          : []
+      )
+    )
   );
+  
 
   const teamChartData = data.map(row => {
     const totalOutput = row.machines.reduce((sum, m) => {
@@ -55,6 +60,12 @@ const Dashboard = ({ data, onLogout }) => {
   const totalObj = teamChartData.reduce((sum, v) => sum + v.obj, 0);
   const pourcentage = totalObj === 0 ? 0 : Math.round((totalOutput / totalObj) * 100);
   console.log("lineChartData" , lineChartData)
+
+  if (!Array.isArray(data)) {
+    console.error("Dashboard: data is not an array", data);
+    return <Typography variant="h6" color="error">Erreur : données invalides</Typography>;
+  }
+
   return (
     <Box sx={{ p: 4, width: '100%', overflowX: 'hidden' }}>
         <Typography variant="h4" gutterBottom>Réalisation Dashboard</Typography>

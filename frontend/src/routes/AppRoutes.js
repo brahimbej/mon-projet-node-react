@@ -43,10 +43,10 @@ const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDash
 
               <Box sx={{  }}>
                 {!dashboardData && (
-                  <FileUpload onUploadSuccess={setDashboardData} />
+                  <FileUpload onUploadSuccess={setDashboardData || []} />
                 )}
                 {dashboardData && (
-                  <Dashboard data={dashboardData} />
+                  <Dashboard data={dashboardData || []} />
                 )}
               </Box>
           ) : (
@@ -61,7 +61,7 @@ const AppRoutes = ({ isAuthenticated, handleLoginSuccess, dashboardData, setDash
             // <div>New Page</div>
             <Box sx={{ flex:1, justifyContent :"center", alignItems :"center" }}>
 
-              <FileUpload onUploadSuccess={setDashboardData} />
+              <FileUpload onUploadSuccess={setDashboardData || []} />
             </Box>
 
           ) : (
