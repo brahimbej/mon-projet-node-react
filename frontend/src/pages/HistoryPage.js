@@ -12,7 +12,8 @@ import {
   IconButton,
   TextField,
   InputAdornment,
-  InputProps
+  InputProps,
+  CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -22,26 +23,27 @@ const HistoryPage = () => {
   const [history, setHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/api/upload/history', {
-          credentials: 'include'
-        });
-        if (!response.ok) {
-          throw new Error('Erreur lors du chargement de l\'historique');
-        }
-        const data = await response.json();
-        setHistory(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erreur lors du chargement de l'historique:", error);
-        setLoading(false);
+  const fetchHistory = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/api/upload/history', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement de l\'historique');
       }
-    };
+      const data = await response.json();
+      setHistory(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erreur lors du chargement de l'historique:", error);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHistory();
   }, []);
 
@@ -83,6 +85,29 @@ const HistoryPage = () => {
         return 'En cours';
       default:
         return status;
+    }
+  };
+
+  const handleDelete = async (id, e) => {
+    e.stopPropagation(); // Prevent triggering the row click
+    try {
+      setDeleteLoading(id);
+      const response = await fetch(`http://localhost:4000/api/upload/history/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+
+      // Remove the deleted item from the state
+      setHistory(prev => prev.filter(item => item._id !== id));
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Une erreur est survenue lors de la suppression');
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
@@ -146,7 +171,7 @@ const HistoryPage = () => {
             >
               <ListItemText
                 primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }} >
                     <Typography variant="h6">
                       {item.originalName}
                     </Typography>
@@ -172,11 +197,27 @@ const HistoryPage = () => {
                 }
               />
               <Box>
-                <IconButton edge="end" aria-label="download">
+                <IconButton 
+                  edge="end" 
+                  aria-label="download"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle download
+                  }}
+                >
                   <FileDownloadIcon />
                 </IconButton>
-                <IconButton edge="end" aria-label="delete">
-                  <DeleteIcon />
+                <IconButton 
+                  edge="end" 
+                  aria-label="delete"
+                  onClick={(e) => handleDelete(item._id, e)}
+                  disabled={deleteLoading === item._id}
+                >
+                  {deleteLoading === item._id ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    <DeleteIcon />
+                  )}
                 </IconButton>
               </Box>
             </ListItem>

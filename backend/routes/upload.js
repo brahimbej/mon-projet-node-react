@@ -155,6 +155,33 @@ router.get('/history/:id', async (req, res) => {
   }
 });
 
+// Delete a specific history item by ID
+router.delete('/history/:id', async (req, res) => {
+  try {
+    const item = await DashboardData.findById(req.params.id);
+    
+    if (!item) {
+      return res.status(404).json({ message: 'History item not found' });
+    }
+    
+    // Delete the file from the uploads folder if it exists
+    if (item.filename) {
+      const filePath = path.join(__dirname, '../uploads', item.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
+    // Delete the document from the database
+    await DashboardData.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Item deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting history item:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Route pour télécharger un fichier
 router.get('/download/:filename', (req, res) => {
   const filePath = path.join(__dirname, '../uploads', req.params.filename);

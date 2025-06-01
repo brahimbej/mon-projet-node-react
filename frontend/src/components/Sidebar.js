@@ -54,6 +54,8 @@ const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
     const handleNewFile = () => {
         setDashboardData(null);
         localStorage.removeItem('dashboardData');
+        // go to dashboard
+        navigate('/dashboard');
     };
 
     return (
@@ -71,7 +73,7 @@ const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
         >
             <div>
                 <List>
-                    <ListItem>
+                    {/* <ListItem>
                         <input
                             type="file"
                             accept=".xlsx,.xls"
@@ -93,7 +95,7 @@ const Sidebar = ({ onLogout, dashboardData, setDashboardData }) => {
                         >
                             {loading ? 'Uploading...' : 'Upload File'}
                         </Button>
-                    </ListItem>
+                    </ListItem> */}
 
                     {error && (
                         <ListItem>
