@@ -11,7 +11,9 @@ import Sidebar from '../Sidebar';
 
 const Dashboard = ({ data, onLogout }) => {
   const allMachineRefs = Array.from(
-    new Set(data.flatMap(row => row.machines.map(m => m.reference)))
+    // Array.isArray(data) ? data.flatMap(item => /* your logic */) : [];
+
+    Array.isArray(data) ? new Set(data.flatMap(row => row.machines.map(m => m.reference))) : []
   );
 
   const teamChartData = data.map(row => {
